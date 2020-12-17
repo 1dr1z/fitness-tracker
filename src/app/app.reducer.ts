@@ -11,10 +11,12 @@ export interface State {
   auth: fromAuth.State;
 }
 
-export const reducers: ActionReducerMap<State> = {
-  ui: fromUi.uiReducer,
-  auth: fromAuth.authReducer
-};
+export function reducers(): ActionReducerMap<State> {
+  return {
+    ui: fromUi.uiReducer,
+    auth: fromAuth.authReducer
+  };
+}
 
 export const getUiState = createFeatureSelector<fromUi.State>('ui');
 export const getIsLoading = createSelector(getUiState, fromUi.getIsLoading);
