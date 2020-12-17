@@ -1,9 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs/Subscription';
+import * as fromRoot from '../../app.reducer';
 import { Exercise } from '../exercise.model';
+import * as fromTraining from '../training.reducer';
 import { TrainingService } from '../training.service';
-import { UIService } from './../../shared/ui.service';
 
 @Component({
   selector: 'app-new-training',
@@ -11,27 +14,30 @@ import { UIService } from './../../shared/ui.service';
   styleUrls: ['./new-training.component.css']
 })
 export class NewTrainingComponent implements OnInit, OnDestroy {
-  exercises: Exercise[];
+  exercises$: Observable<Exercise[]>;
   exerciseSubscription: Subscription;
-  private loadingSubs: Subscription;
-  isLoading = true;
+  // private loadingSubs: Subscription;
+  isLoading$: Observable<boolean>;
 
   constructor(
     private trainingService: TrainingService,
-    private uiService: UIService
+    // private uiService: UIService,
+    private store: Store<fromTraining.State>
   ) {}
 
   ngOnInit() {
-    this.loadingSubs = this.uiService.loadingStateChanged.subscribe(
-      isLoading => {
-        this.isLoading = isLoading;
-      }
-    );
-    this.exerciseSubscription = this.trainingService.exercisesChanged.subscribe(
-      exercises => {
-        this.exercises = exercises;
-      }
-    );
+    this.isLoading$ = this.store.select(fromRoot.getIsLoading);
+    // this.loadingSubs = this.uiService.loadingStateChanged.subscribe(
+    //   isLoading => {
+    //     this.isLoading = isLoading;
+    //   }
+    // );
+    // this.exerciseSubscription = this.trainingService.exercisesChanged.subscribe(
+    //   exercises => {
+    //     this.exercises = exercises;
+    //   }
+    // );
+    this.exercises$ = this.store.select(fromTraining.getAvailableTrainings);
     this.fetchExercises();
   }
 
@@ -47,8 +53,8 @@ export class NewTrainingComponent implements OnInit, OnDestroy {
     if (this.exerciseSubscription) {
       this.exerciseSubscription.unsubscribe();
     }
-    if (this.loadingSubs) {
-      this.loadingSubs.unsubscribe();
-    }
+    // if (this.loadingSubs) {
+    //   this.loadingSubs.unsubscribe();
+    // }
   }
 }

@@ -6,10 +6,11 @@ import {
   ViewChild
 } from '@angular/core';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { Exercise } from '../exercise.model';
+import * as fromTraining from '../training.reducer';
 import { TrainingService } from '../training.service';
-
 @Component({
   selector: 'app-past-trainings',
   templateUrl: './past-trainings.component.html',
@@ -24,15 +25,18 @@ export class PastTrainingsComponent
   @ViewChild(MatSort, { static: false }) sort: MatSort;
   @ViewChild(MatPaginator, { static: false }) paginator: MatPaginator;
 
-  constructor(private trainingService: TrainingService) {}
+  constructor(
+    private trainingService: TrainingService,
+    private store: Store<fromTraining.State>
+  ) {}
 
   ngOnInit() {
-    this.exChangedSubscription = this.trainingService.finishedExercisesChanged.subscribe(
-      (exercises: Exercise[]) => {
+    this.store
+      .select(fromTraining.getFinishedExercises)
+      .subscribe((exercises: Exercise[]) => {
         this.dataSource.data = exercises;
         console.log(exercises);
-      }
-    );
+      });
     this.trainingService.fetchCompletedOrCancelledExercises();
   }
 
